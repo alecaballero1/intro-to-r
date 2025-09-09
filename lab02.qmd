@@ -1,0 +1,62 @@
+---
+title: "Lab 2 Assignment: Group 05"
+format:
+  html:
+    embed-resources: true
+editor: visual
+---
+
+## Getting data 
+
+```{r}
+#| echo: false
+
+#Define url where data is stored 
+target_url <- "https://github.com/ramhiser/datamicroarray/raw/master/data/gravier.RData"
+#Load data into environment
+load("~/introR/data/gravier.RData")
+#Set random seed 
+set.seed(676571)
+#Declare cancer_data and normalize values 
+cancer_data=mutate(as_tibble(pluck(gravier,"x")),
+                   y=pluck(gravier,"y"),
+                   pt_id=1:length(pluck(gravier, "y")),
+                   age=round(rnorm(length(pluck(gravier,"y")),
+                                   mean=55,sd=10),1))
+#Set value names and classify
+cancer_data=rename(cancer_data,event_label=y)
+cancer_data$age_group=cut(cancer_data$age,breaks=seq(10,100,by=10))
+cancer_data=relocate(cancer_data,c(pt_id,age,age_group,pt_id,event_label))
+#Show final data
+cancer_data
+```
+
+## Load libraries
+
+```{r}
+#Load ggplot and viridis for plot aesthetics 
+library(tidyverse)
+library(viridis)
+```
+
+## Running code
+
+With the libraries loaded and data in our environment, is now time to run the graphs
+
+```{r}
+#Our main variable is g7F07 (gene selected)
+#The colors and labels will be based on event_label (good/poor)
+ggplot(cancer_data, aes(x = g7F07, fill = event_label, color = event_label)) +
+  #Define density of plots
+  geom_density(alpha = 0.5) +
+  #We use the viridis library for filling the graphs
+  scale_fill_viridis_d() +
+  scale_color_viridis_d() +
+  #Side of where the labels are presented 
+  theme(legend.position = "right") +
+  #Labels 
+  labs(
+    x = "Expression level (g7F07)",
+    y = "Density"
+  )
+```
